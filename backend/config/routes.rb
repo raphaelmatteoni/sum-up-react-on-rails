@@ -9,5 +9,9 @@ Rails.application.routes.draw do
     resources :groups, only: [:index]
   end
   resources :groups, only: [:create, :index]
-  resources :items, only: [:update]
+  resources :items, only: [:index] do
+    collection do
+      put :update_batch
+    end
+  end
 end

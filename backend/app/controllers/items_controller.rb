@@ -1,16 +1,20 @@
 class ItemsController < ApplicationController
-  def update
-    item = Item.find(params[:id])
-    if item.update(item_params)
-      render json: item, status: :created
+  def index
+    items = Item.where(bill_id: params[:bill_id])
+    render json: items, status: :ok
+  end
+
+  def update_batch
+    if Item.where(id: params[:item_ids]).update_all(group_id: params[:group_id])
+      render json: { success: true }, status: :ok
     else
-      render json: item.errors, status: :unprocessable_entity
+      render json: { error: 'Failed to update items' }, status: :unprocessable_entity
     end
   end
 
   private
 
-  def item_params
-    params.require(:item).permit(:group_id)
+  def batch_params
+    params.permit(:group_id, item_ids: [])
   end
 end

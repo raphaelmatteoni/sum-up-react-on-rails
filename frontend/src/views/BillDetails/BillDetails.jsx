@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createGroup, updateItem, getBill, getGroupsByBillId } from '../../services/api';
+import { createGroup, updateItem, getBill, getGroupsByBillId, updateItemsBatch } from '../../services/api';
 import Button from '../../components/Button/Button';
 import Modal from '../../components/Modal/Modal';
 import Input from '../../components/Input/Input';
@@ -59,26 +59,37 @@ function BillDetails() {
   };
 
   const handleGroupProceed = async () => {
-    const groupId = await createGroup(groupName, id);
+    try {
+      const groupId = await createGroup(groupName, id);
+      
+      await updateItemsBatch(
+        selectedItems.map(item => item.id),
+        groupId
+      );
 
-    selectedItems.forEach(async (item) => {
-      await updateItem(item.id, { group_id: groupId });
-    });
+      const remainingItems = items.filter(
+        item => !selectedItems.some(selectedItem => selectedItem.id === item.id)
+      );
+      
+      const newGroup = { 
+        id: groupId, 
+        name: groupName, 
+        items: selectedItems 
+      };
 
-    const remainingItems = items.filter(item =>!selectedItems.some(selectedItem => selectedItem.id === item.id)); // Compara objetos
-    setItems(remainingItems);
-
-    const newGroup = { id: groupId, name: groupName, items: selectedItems };
-    setGroups(prevGroups => [...prevGroups, newGroup]);
-
-    setSelectedItems([]);
-    setGroupName('');
-    setShowModal(false);
+      setItems(remainingItems);
+      setGroups(prevGroups => [...prevGroups, newGroup]);
+      setSelectedItems([]);
+      setGroupName('');
+      setShowModal(false);
+    } catch (error) {
+      console.error('Erro ao criar grupo:', error);
+    }
   };
 
   const applyTaxRate = () => {
     const updatedGroups = groups.map(group => {
-      const totalValue = group.items.reduce((acc, item) => acc + item.value, 0);
+      const totalValue = group.items.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
       const totalWithTax = (totalValue * (1 + taxRate / 100)).toFixed(2);
       return {
        ...group,
@@ -128,7 +139,10 @@ function BillDetails() {
         )}
 
         {groups.map((group) => {
-          const totalValue = group.items.reduce((acc, item) => acc + item.value, 0);
+          const totalValue = group.items.reduce((acc, item) => 
+            acc + (Number(item.value) || 0), 
+            0
+          );
 
           return (
             <div className="mt-3 w-full bg-slate-300 text-black rounded-lg p-2" key={group.id}>
@@ -140,7 +154,9 @@ function BillDetails() {
                 </div>
               ))}
               <div className="m-2 w-full">
-                <strong>Total do Grupo: R${group.totalWithTax? group.totalWithTax : totalValue.toFixed(2)}</strong>
+                <strong>
+                  Total do Grupo: R${group.totalWithTax || totalValue.toFixed(2)}
+                </strong>
               </div>
             </div>
           );

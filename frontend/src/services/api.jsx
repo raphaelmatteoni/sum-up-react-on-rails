@@ -107,4 +107,28 @@ async function getGroupsByBillId(billId) {
   }
 }
 
-export { createGroup, updateItem, getBill, getGroupsByBillId, createBill };
+async function updateItemsBatch(itemIds, groupId) {
+  try {
+    const response = await fetch(`http://localhost:3000/items/update_batch`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        item_ids: itemIds,
+        group_id: groupId
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating items:', error);
+    throw error;
+  }
+}
+
+export { createGroup, updateItem, getBill, getGroupsByBillId, createBill, updateItemsBatch };
