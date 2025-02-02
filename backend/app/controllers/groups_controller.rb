@@ -1,5 +1,6 @@
 class GroupsController < ApplicationController
   def create
+    puts group_params
     group = Group.create!(group_params)
     render json: group, status: :created
   end

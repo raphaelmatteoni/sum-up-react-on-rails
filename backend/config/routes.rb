@@ -8,6 +8,6 @@ Rails.application.routes.draw do
   resources :bills, only: [:create, :show] do
     resources :groups, only: [:index]
   end
-  resources :groups, only: [:create]
+  resources :groups, only: [:create, :index]
   resources :items, only: [:update]
 end
