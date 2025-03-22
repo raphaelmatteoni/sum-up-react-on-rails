@@ -131,4 +131,23 @@ async function updateItemsBatch(itemIds, groupId) {
   }
 }
 
-export { createGroup, updateItem, getBill, getGroupsByBillId, createBill, updateItemsBatch };
+async function createBillFromImage(formData) {
+  try {
+    const response = await fetch('http://localhost:3000/bills/create_from_image', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error creating bill from image:', error);
+    throw error;
+  }
+}
+
+export { createGroup, updateItem, getBill, getGroupsByBillId, createBill, updateItemsBatch, createBillFromImage };

@@ -1,0 +1,14 @@
+default: &default
+  openai:
+    image_analysis:
+      default_user_prompt: "Valide se a soma de todos os itens corresponde ao valor total da conta e inclua um campo indicando se a soma está correta ou não. Obs: Alguns itens possuem mais texto do que apenas o nome, quero toda essa informaçao na chave name, valor na chave value e quantidade na chave qty, retorne sempre em JSON"
+      default_system_prompt: "Você é um assistente especializado em extrair informações de contas de restaurante. Por favor, analise a imagem da conta e identifique todos os itens e seus respectivos valores."
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default 

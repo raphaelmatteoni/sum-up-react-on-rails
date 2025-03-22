@@ -7,6 +7,9 @@ Rails.application.routes.draw do
 
   resources :bills, only: [:create, :show] do
     resources :groups, only: [:index]
+    collection do
+      post :create_from_image
+    end
   end
   resources :groups, only: [:create, :index]
   resources :items, only: [:index] do

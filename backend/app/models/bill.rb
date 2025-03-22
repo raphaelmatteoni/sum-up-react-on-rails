@@ -17,16 +17,30 @@ class Bill < ApplicationRecord
   private
 
   def self.parse_items(text)
-    text.split(/[;\n]/).map do |item_text|
-      next if item_text.strip.empty?
-      
-      match = item_text.match(/([a-zA-Z]+)\s*([0-9.]+)/)
-      next unless match
-
-      {
-        name: match[1],
-        value: match[2].to_f
-      }
-    end.compact
+    begin
+      if text.strip.start_with?('{') && text.strip.end_with?('}')
+        json_data = JSON.parse(text)
+        
+        if json_data["items"].is_a?(Array)
+          expanded_items = []
+          
+          json_data["items"].each do |item|
+            quantity = item["qty"] || 1
+            quantity = quantity.to_i
+            
+            quantity.times do
+              expanded_items << {
+                name: item["name"],
+                value: item["value"].to_f
+              }
+            end
+          end
+          
+          return expanded_items
+        end
+      end
+    rescue JSON::ParserError => e
+      Rails.logger.warn("Não foi possível analisar como JSON: #{e.message}. Tentando método alternativo.")
+    end    
   end
 end
